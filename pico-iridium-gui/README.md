@@ -9,11 +9,16 @@ Shows modem status, signal and IMEI, and lets you send and receive messages from
 - RockBLOCK+ uses RS-232 levels and a 9–30 V supply: put a MAX3232 between it and the Pico
 - Optional: 0.96" SSD1306 128x64 I2C OLED as a debug console (I2C1)
 
-| RockBLOCK (via MAX3232) | Pico pin |
-|-------------------------|----------|
-| RX (data into modem)    | GP4 / UART1 TX (pin 6) |
-| TX (data out of modem)  | GP5 / UART1 RX (pin 7) |
-| GND                     | GND (pin 8) |
+| RockBLOCK (via MAX3232)            | Pico pin |
+|------------------------------------|----------|
+| RX input, yellow (data into modem) | GP4 / UART1 TX (pin 6) |
+| TX output, blue (data out of modem) | GP5 / UART1 RX (pin 7) |
+| GND                                | GND (pin 8) |
+
+The MAX3232 breakout sits in the middle: power it from the Pico's 3V3 (not 5 V) and tie its
+GND to both the Pico and the RockBLOCK. Breakout TX/RX labels are often from the board's own
+point of view — if the modem doesn't answer, the MAX3232's TTL output (it idles at 3.3 V) must
+land on GP5, not GP4.
 
 | OLED | Pico pin |
 |------|----------|
