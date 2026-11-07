@@ -8,7 +8,13 @@ from machine import Pin, SPI, UART
 spi = SPI(0, 2_000_000, mosi=Pin(19), miso=Pin(16), sck=Pin(18))
 nic = network.WIZNET5K(spi, Pin(17), Pin(20))
 nic.active(True)
-nic.ifconfig("dhcp")
+while True:
+    try:
+        nic.ifconfig("dhcp")
+        break
+    except OSError as e:
+        print("DHCP failed (%s), check the Ethernet cable. Retrying..." % e)
+        time.sleep(3)
 print("Open http://%s" % nic.ifconfig()[0])
 
 # --- Iridium modem ---
@@ -48,7 +54,7 @@ def field(reply, prefix):
 
 def session():
     """Run an SBD session (sends the outgoing buffer, downloads any waiting message)."""
-    v = field(at("AT+SBDIX", 60), "+SBDIX:")
+    v = field(at("AT+SBDIX", 120), "+SBDIX:")
     if not v:
         return "no reply from modem"
     mo, momsn, mt, mtmsn, mtlen, queued = [int(x) for x in v.split(",")]
@@ -134,6 +140,7 @@ s.listen(2)
 
 while True:
     c, _ = s.accept()
+    c.settimeout(5)  # don't hang on idle browser connections
     try:
         req = c.recv(1024)
         parts = req.split(b"\r\n\r\n", 1)
